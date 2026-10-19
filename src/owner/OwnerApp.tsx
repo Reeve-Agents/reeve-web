@@ -1,9 +1,13 @@
 import { startAuthentication, startRegistration } from "@simplewebauthn/browser";
 import { packFor, type DomainPack, type PackView } from "@reeve/core/packs";
-import { shortDate } from "@reeve/core/simview";
+import { shortDate as enDate } from "@reeve/core/simview";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, type GenericOperationRecord, type Health, type LedgerView, type RulebookRecord, type RunRecord } from "../api";
+import { longDate, rupiah, toolWords } from "../studio/plain";
 import { loadMinimarketSample } from "./sample";
+
+/** The owner app speaks Indonesian, like the owner studio: "15 Nov". */
+const shortDate = (date: string) => enDate(date, "id");
 
 /** ?sample=minimarket shows the minimarket pack's real CreateOS run, read-only. */
 const SAMPLE = new URLSearchParams(window.location.search).get("sample") === "minimarket";
@@ -55,7 +59,7 @@ export function OwnerApp({ onStudio }: { onStudio: () => void }) {
 
   const events = run?.results?.simulation.events ?? [];
   // The domain pack decides the nouns, statuses and KPIs; the tabs stay the same for every business.
-  const pack = useMemo(() => packFor(record?.rulebook), [record]);
+  const pack = useMemo(() => packFor(record?.rulebook, "id"), [record]);
   const days = useMemo(() => pack.days(events), [pack, events]);
   const firstMonth = days.filter((d) => d.slice(0, 7) === days[0]?.slice(0, 7));
   // Open on the KPI check day (the 15th) when the run has one, else the last day of the first month.
@@ -63,10 +67,10 @@ export function OwnerApp({ onStudio }: { onStudio: () => void }) {
   const current = day ?? defaultDay;
   const view = useMemo(() => (current ? pack.view(events, current, record?.rulebook) : null), [pack, events, current, record]);
   const tabs: { key: Tab; label: string }[] = [
-    { key: "today", label: "Today" },
-    { key: "approvals", label: "Approvals" },
+    { key: "today", label: "Hari ini" },
+    { key: "approvals", label: "Persetujuan" },
     { key: "entities", label: pack.entity.many },
-    { key: "ledger", label: "Ledger" },
+    { key: "ledger", label: "Bukti" },
   ];
 
   const guard = async (label: string, fn: () => Promise<void>) => {
@@ -117,7 +121,7 @@ export function OwnerApp({ onStudio }: { onStudio: () => void }) {
 
       {SAMPLE && (
         <p className="owner__sample">
-          Sample business: a real CreateOS run of the minimarket pack. Read-only; approvals happen in your own workspace.
+          Contoh usaha: uji coba asli paket minimarket di CreateOS. Hanya untuk dilihat; persetujuan dilakukan di ruang kerjamu sendiri.
         </p>
       )}
 
@@ -128,13 +132,13 @@ export function OwnerApp({ onStudio }: { onStudio: () => void }) {
       )}
 
       <main className="owner__main">
-        {!loaded && <p className="owner__empty">Loading your business…</p>}
+        {!loaded && <p className="owner__empty">Memuat usahamu…</p>}
         {loaded && !record && (
           <div className="owner__empty">
-            <p>No rulebook yet.</p>
-            <p>Describe your SOP in the studio and Reeve will compile it.</p>
+            <p>Belum ada aturan.</p>
+            <p>Ceritakan SOP-mu di studio, nanti Reeve menyusunnya jadi aturan.</p>
             <button type="button" className="o-btn" onClick={onStudio}>
-              Open the studio
+              Buka studio
             </button>
           </div>
         )}
@@ -167,7 +171,7 @@ export function OwnerApp({ onStudio }: { onStudio: () => void }) {
         {loaded && tab === "ledger" && <Ledger ledger={ledger} />}
       </main>
 
-      <nav className="tabbar" aria-label="Owner app">
+      <nav className="tabbar" aria-label="Aplikasi pemilik">
         {tabs.map((t) => (
           <button
             key={t.key}
@@ -200,8 +204,8 @@ function Today(props: {
   if (!run?.results || !current || !view) {
     return (
       <div className="owner__empty">
-        <p>No simulated month yet.</p>
-        <p>Run Simulate and audit in the studio to see each day here.</p>
+        <p>Belum ada bulan latihan.</p>
+        <p>Jalankan uji coba di studio, nanti tiap harinya muncul di sini.</p>
       </div>
     );
   }
@@ -211,10 +215,8 @@ function Today(props: {
     <div className="o-stack">
       {waiting > 0 && (
         <button type="button" className="o-notice" onClick={onApprovals}>
-          <b>
-            {waiting} waiting for you
-          </b>
-          <span>{needsApproval ? "The rulebook passed the Auditor. Approve it to go live." : "Reeve flagged something it will not decide on its own."}</span>
+          <b>{waiting} menunggu kamu</b>
+          <span>{needsApproval ? "Aturanmu lolos pemeriksaan Auditor. Setujui supaya mulai jalan." : "Reeve menandai hal yang tidak akan diputuskannya sendiri."}</span>
         </button>
       )}
 
@@ -227,7 +229,7 @@ function Today(props: {
           {k.target ? (
             <>
               <span className="o-kpi__of">
-                {k.targetKind === "limit" ? `limit ${k.targetDisplay}` : `of ${k.targetDisplay} target`}
+                {k.targetKind === "limit" ? `batas ${k.targetDisplay}` : `dari target ${k.targetDisplay}`}
               </span>
               <span className="o-track">
                 <span className="o-track__fill" style={{ transform: `scaleX(${Math.min(1, k.value / k.target).toFixed(3)})` }} />
@@ -247,8 +249,8 @@ function Today(props: {
         ))}
       </div>
 
-      <section className="o-card" aria-label="What Reeve did">
-        <span className="o-label">What Reeve did on {shortDate(current)}</span>
+      <section className="o-card" aria-label="Yang dikerjakan Reeve">
+        <span className="o-label">Yang dikerjakan Reeve, {shortDate(current)}</span>
         {view.lines.length ? (
           <ul className="o-list">
             {view.lines.map((l) => (
@@ -256,11 +258,11 @@ function Today(props: {
             ))}
           </ul>
         ) : (
-          <p className="o-muted">Nothing needed doing.</p>
+          <p className="o-muted">Tidak ada yang perlu dikerjakan.</p>
         )}
       </section>
 
-      <p className="o-foot">Simulated month from run {run.id}, checked by the Auditor before anything goes live.</p>
+      <p className="o-foot">Bulan latihan dari uji coba {run.id}, diperiksa Auditor sebelum ada yang jalan sungguhan.</p>
     </div>
   );
 }
@@ -268,20 +270,20 @@ function Today(props: {
 function DayPicker({ days, current, onDay }: { days: string[]; current: string; onDay: (d: string) => void }) {
   const i = days.indexOf(current);
   return (
-    <div className="o-day" role="group" aria-label="Day">
-      <button type="button" className="o-day__btn" disabled={i <= 0} onClick={() => onDay(days[i - 1]!)} aria-label="Previous day">
+    <div className="o-day" role="group" aria-label="Hari">
+      <button type="button" className="o-day__btn" disabled={i <= 0} onClick={() => onDay(days[i - 1]!)} aria-label="Hari sebelumnya">
         ‹
       </button>
       <span className="o-day__label">
         <b>{shortDate(current)}</b>
-        <span>simulated day</span>
+        <span>hari latihan</span>
       </span>
       <button
         type="button"
         className="o-day__btn"
         disabled={i < 0 || i >= days.length - 1}
         onClick={() => onDay(days[i + 1]!)}
-        aria-label="Next day"
+        aria-label="Hari berikutnya"
       >
         ›
       </button>
@@ -309,19 +311,19 @@ function Approvals(props: {
     <div className="o-stack">
       {record.status === "approved" && record.approval ? (
         <section className="o-card o-done">
-          <span className="o-label">All caught up</span>
-          <h2 className="o-h">{record.rulebook.business_name} is live</h2>
+          <span className="o-label">Semua beres</span>
+          <h2 className="o-h">{record.rulebook.business_name} sudah jalan</h2>
           <p className="o-muted">
-            Approved {new Date(record.approval.at).toLocaleString()} with your passkey. Signed into the ledger at #{record.approval.ledgerSeq}.
+            Disetujui {longDate(record.approval.at)} dengan sidik jarimu. Tercatat di bukti #{record.approval.ledgerSeq}.
           </p>
         </section>
       ) : needsApproval ? (
         <section className="o-card o-approve">
-          <span className="o-label o-label--signal">Needs your approval</span>
-          <h2 className="o-h">{record.rulebook.business_name} rulebook</h2>
+          <span className="o-label o-label--signal">Perlu persetujuanmu</span>
+          <h2 className="o-h">Aturan {record.rulebook.business_name}</h2>
           <p className="o-muted">
-            {record.rulebook.cards.length} rules · Auditor {run?.verdict?.status.toUpperCase()}
-            {mutation ? ` · ${mutation.killed}/${mutation.total} planted bugs caught` : ""}
+            {record.rulebook.cards.length} aturan · Auditor {run?.verdict?.status === "pass" ? "LULUS" : "GAGAL"}
+            {mutation ? ` · ${mutation.killed} dari ${mutation.total} kesalahan yang ditanam ketahuan` : ""}
           </p>
           <ul className="o-list o-list--checks">
             {record.rulebook.cards.slice(0, 4).map((c) => (
@@ -329,27 +331,27 @@ function Approvals(props: {
             ))}
           </ul>
           {sample ? (
-            <p className="o-muted">In your own workspace, this is where you approve with your fingerprint.</p>
+            <p className="o-muted">Di ruang kerjamu sendiri, di sinilah kamu menyetujui dengan sidik jari.</p>
           ) : !hasPasskey ? (
             <button type="button" className="o-btn" onClick={onRegister} disabled={busy !== null}>
-              {busy === "passkey" ? "Waiting for your device…" : "Set up your fingerprint first"}
+              {busy === "passkey" ? "Menunggu perangkatmu…" : "Daftarkan sidik jarimu dulu"}
             </button>
           ) : (
             <button type="button" className="o-btn" onClick={onApprove} disabled={busy !== null}>
-              {busy === "approve" ? "Confirm on your device…" : "Approve with fingerprint"}
+              {busy === "approve" ? "Konfirmasi di perangkatmu…" : "Setujui dengan sidik jari"}
             </button>
           )}
           <p className="o-foot">
-            You approve exactly this audited run: receipt {run?.receipt?.receipt_hash.slice(0, 12)}…
+            Kamu menyetujui persis uji coba yang sudah diaudit ini: tanda terima {run?.receipt?.receipt_hash.slice(0, 12)}…
           </p>
         </section>
       ) : (
         <section className="o-card">
-          <span className="o-label">Nothing to approve</span>
+          <span className="o-label">Tidak ada yang perlu disetujui</span>
           <p className="o-muted">
             {run?.verdict?.status === "fail"
-              ? "The Auditor stopped the last run. The Builder has to fix it before it reaches you."
-              : "When the Auditor passes a run, it shows up here for your approval."}
+              ? "Auditor menghentikan uji coba terakhir. Builder harus memperbaikinya dulu sebelum sampai ke kamu."
+              : "Begitu Auditor meloloskan uji coba, aturannya muncul di sini untuk kamu setujui."}
           </p>
         </section>
       )}
@@ -358,16 +360,16 @@ function Approvals(props: {
 
       {view && view.exceptions.length > 0 && (
         <section className="o-card">
-          <span className="o-label">{record.status === "approved" && record.rulebook.pack === "generic" ? "In the audited month" : "Flagged for you"}</span>
-          <p className="o-muted">Cases outside the rules. Reeve does not decide these on its own.</p>
+          <span className="o-label">{record.status === "approved" && record.rulebook.pack === "generic" ? "Di bulan yang diaudit" : "Ditandai untukmu"}</span>
+          <p className="o-muted">Kasus di luar aturan. Reeve tidak memutuskannya sendiri.</p>
           <ul className="o-list">
             {view.exceptions.map((x) => (
               <li key={x.id} className="o-flag">
                 <span className="o-flag__date">{shortDate(x.date)}</span>
                 <span>{x.text}</span>
                 <span className="o-flag__opts">
-                  Options: {x.options.join(" or ")}
-                  {x.needsPasskey ? " (passkey)" : ""}
+                  Pilihan: {orWords(x.options)}
+                  {x.needsPasskey ? " (pakai sidik jari)" : ""}
                 </span>
               </li>
             ))}
@@ -377,7 +379,7 @@ function Approvals(props: {
 
       {questions.length > 0 && (
         <section className="o-card">
-          <span className="o-label">Questions for you</span>
+          <span className="o-label">Pertanyaan untukmu</span>
           <ul className="o-list">
             {questions.map((q) => (
               <li key={q}>{q}</li>
@@ -393,7 +395,7 @@ function Approvals(props: {
 function Entities(props: { pack: DomainPack; view: PackView | null; days: string[]; current: string | null; onDay: (d: string) => void }) {
   const { pack, view, days, current, onDay } = props;
   const [open, setOpen] = useState<string | null>(null);
-  if (!current || !view) return <p className="owner__empty">No simulated month yet.</p>;
+  if (!current || !view) return <p className="owner__empty">Belum ada bulan latihan.</p>;
   const sel = view.entities.find((e) => e.id === open);
   const tone = (status: string) => pack.statuses[status]?.tone ?? "idle";
   const label = (status: string) => pack.statuses[status]?.label ?? status;
@@ -426,7 +428,7 @@ function Entities(props: { pack: DomainPack; view: PackView | null; days: string
           {sel.flags.length > 0 && <p className="o-foot">{sel.flags.join(" · ")}</p>}
         </section>
       ) : (
-        <p className="o-muted">Tap a {pack.entity.one.toLowerCase()} to see where it stands.</p>
+        <p className="o-muted">Ketuk {pack.entity.one.toLowerCase()} untuk melihat kondisinya.</p>
       )}
       <ul className="o-legend">
         {used.map((st) => (
@@ -442,6 +444,13 @@ function Entities(props: { pack: DomainPack; view: PackView | null; days: string
 
 /* ---------------- Ledger ---------------- */
 /* ---------------- Live run (Any SOP) ---------------- */
+/** "A, B atau C". */
+const orWords = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(", ")} atau ${xs.at(-1)}` : (xs[0] ?? ""));
+
+/** A held action in Indonesian; the API's own text is English. */
+const heldWords = (h: GenericOperationRecord["held"][number]) =>
+  `${h.tool ? toolWords(h.tool) : "Aksi"} untuk ${h.key}${h.amount !== undefined ? `, sekitar ${rupiah(h.amount)}` : ""}. Di atas batasmu, kirim?`;
+
 /** Actions the approved rules held above your limit in the live run: send each with your fingerprint, or don't. */
 function LiveHeld({ record, hasPasskey }: { record: RulebookRecord; hasPasskey: boolean }) {
   const [op, setOp] = useState<GenericOperationRecord | null>(null);
@@ -474,22 +483,22 @@ function LiveHeld({ record, hasPasskey }: { record: RulebookRecord; hasPasskey: 
   };
   return (
     <section className="o-card">
-      <span className="o-label">{open.length ? "Waiting for you" : "Live"}</span>
+      <span className="o-label">{open.length ? "Menunggu kamu" : "Berjalan"}</span>
       <p className="o-muted">
-        Running {op.clock ? `through ${shortDate(op.clock)}` : "since today"} · {sent} sent · {op.held.filter((h) => h.kind === "blocked").length} blocked by a never rule
+        Berjalan {op.clock ? `sampai ${shortDate(op.clock)}` : "sejak hari ini"} · {sent} terkirim · {op.held.filter((h) => h.kind === "blocked").length} ditahan aturan larangan
       </p>
       {error && <p className="owner__error">{error}</p>}
       <ul className="o-list">
         {open.map((h) => (
           <li key={h.id} className="o-flag">
             <span className="o-flag__date">{shortDate(h.date)}</span>
-            <span>{h.text}</span>
+            <span>{heldWords(h)}</span>
             <span className="o-actions">
               <button type="button" className="o-btn" disabled={busy !== null || !hasPasskey} onClick={() => void act(h.id, true)}>
-                {busy === h.id ? "Confirm on your device…" : "Send with fingerprint"}
+                {busy === h.id ? "Konfirmasi di perangkatmu…" : "Kirim dengan sidik jari"}
               </button>
               <button type="button" className="o-btn o-btn--ghost" disabled={busy !== null} onClick={() => void act(h.id, false)}>
-                Don't send
+                Jangan kirim
               </button>
             </span>
           </li>
@@ -499,22 +508,32 @@ function LiveHeld({ record, hasPasskey }: { record: RulebookRecord; hasPasskey: 
   );
 }
 
+/** Ledger rows in short words for the pills (the owner studio's Bukti screen has the long ones). */
+const KIND: Record<string, string> = { receipt: "Uji coba", approval: "Disetujui", operation: "Berjalan", anchor: "Disegel" };
+const VERDICT: Record<string, string> = { pass: "Lulus", fail: "Gagal" };
+function ledgerWord(e: LedgerView["entries"][number]): string {
+  if (e.kind === "receipt" && typeof e.verdict === "string") return VERDICT[e.verdict] ?? e.verdict;
+  if (e.kind === "anchor" && !e.tx) return "Segel lokal";
+  return KIND[e.kind] ?? e.kind;
+}
+const stamp = (iso: string) => new Date(iso).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
 function Ledger({ ledger }: { ledger: LedgerView | null }) {
-  if (!ledger) return <p className="owner__empty">Loading the ledger…</p>;
+  if (!ledger) return <p className="owner__empty">Memuat bukti…</p>;
   return (
     <div className="o-stack">
       <section className="o-card">
-        <span className="o-label">Track record</span>
-        <h2 className="o-h">{ledger.intact ? "Chain intact" : "Chain broken"}</h2>
-        <p className="o-muted">Every run leaves a receipt, hash-chained to the one before it.</p>
+        <span className="o-label">Rekam jejak</span>
+        <h2 className="o-h">{ledger.intact ? "Semua catatan utuh" : "Ada catatan yang berubah"}</h2>
+        <p className="o-muted">Setiap uji coba, persetujuan dan hari berjalan dicatat berantai. Mengubah satu catatan merusak semua catatan sesudahnya.</p>
       </section>
       <ul className="o-ledger">
         {[...ledger.entries].reverse().slice(0, 20).map((e) => (
           <li key={e.seq} className={`o-ledger__row is-${e.kind}`}>
             <span className="o-ledger__node" aria-hidden="true" />
             <span className="o-ledger__seq">#{e.seq}</span>
-            <span className="o-ledger__kind">{e.kind === "receipt" ? String(e.verdict ?? "receipt") : e.kind}</span>
-            <span className="o-ledger__at">{new Date(e.at).toLocaleString()}</span>
+            <span className="o-ledger__kind">{ledgerWord(e)}</span>
+            <span className="o-ledger__at">{stamp(e.at)}</span>
           </li>
         ))}
       </ul>
