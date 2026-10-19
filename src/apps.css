@@ -1,0 +1,117 @@
+/* Apps directory and connect sheet: built from the owner studio's iOS pieces (studio/studio.css).
+   No outlined boxes: the list is an inset group on ink, the search is a filled field. */
+
+.apps .apps__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.apps .apps__intro .ios-lede {
+  margin-bottom: 0;
+}
+
+/* iOS search field: filled, rounded, glass icon, clear button. */
+.apps-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 6px 0 12px;
+  border-radius: 12px;
+  background: var(--fill);
+  color: var(--label-3);
+  cursor: text;
+}
+.apps-search:focus-within {
+  box-shadow: 0 0 0 3px var(--tint);
+}
+.apps-search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--label);
+  font: 400 17px/1.35 var(--font);
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* The field draws the ring (focus-within), so the input's own ring would double it. */
+.apps-search input:focus-visible {
+  outline: none;
+}
+.apps-search input::placeholder {
+  color: var(--label-3);
+}
+.apps-search input::-webkit-search-cancel-button,
+.apps-search input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* The visible dot is 18px; the hit area around it is 44px. */
+.apps-search__clear {
+  flex: none;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 44px;
+  cursor: pointer;
+}
+.apps-search__clear svg {
+  box-sizing: content-box;
+  padding: 2px;
+  border-radius: 50%;
+  background: #7d8a9c;
+  color: var(--fill);
+}
+
+/* Each app row: the small tinted button keeps a 44px hit area without growing the row. */
+.apps-list .ios-row__hit {
+  min-height: 60px;
+}
+.apps-list .ios-btn--small {
+  position: relative;
+  flex: none;
+}
+.apps-list .ios-btn--small::after {
+  content: "";
+  position: absolute;
+  inset: -4px -4px;
+}
+.apps-list .ios-pill {
+  flex: none;
+}
+
+.apps__pager {
+  display: flex;
+  gap: 10px;
+}
+.apps__pager > .ios-btn {
+  flex: 1 1 0;
+}
+
+/* Connect sheet. */
+.apps-sheet__lede {
+  color: var(--label-2);
+  font-size: 15px;
+}
+.apps-sheet__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.apps-sheet__actions > .ios-btn {
+  width: 100%;
+}
+a.ios-btn {
+  text-decoration: none;
+}
+.apps-sheet__timer {
+  text-align: center;
+  font: 400 13px var(--mono);
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,31 @@
+{
+  "name": "@reeve/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^14.0.0",
+    "lucide-react": "^1.49.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "@reeve/core": "github:Reeve-Agents/reeve-core#main"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.4",
+    "@reeve/connectors": "github:Reeve-Agents/reeve-connectors#main",
+    "@reeve/rails": "github:Reeve-Agents/reeve-payments#main",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  },
+  "description": "Owner app, owner studio and developer studio (Vite + React).",
+  "repository": "github:Reeve-Agents/reeve-web"
+}
