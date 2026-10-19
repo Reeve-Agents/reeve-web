@@ -511,6 +511,7 @@ function Ledger({ ledger }: { ledger: LedgerView | null }) {
       <ul className="o-ledger">
         {[...ledger.entries].reverse().slice(0, 20).map((e) => (
           <li key={e.seq} className={`o-ledger__row is-${e.kind}`}>
+            <span className="o-ledger__node" aria-hidden="true" />
             <span className="o-ledger__seq">#{e.seq}</span>
             <span className="o-ledger__kind">{e.kind === "receipt" ? String(e.verdict ?? "receipt") : e.kind}</span>
             <span className="o-ledger__at">{new Date(e.at).toLocaleString()}</span>
