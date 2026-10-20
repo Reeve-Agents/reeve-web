@@ -1318,3 +1318,9 @@ span.mono,
     flex: 1 1 100%;
   }
 }
+
+/* Before the session check answers: the studio's ground, nothing else. */
+.auth-splash {
+  min-height: 100dvh;
+  background: #000b16;
+}

@@ -1,6 +1,7 @@
 import {
   ArrowUp,
   BedDouble,
+  CircleUserRound,
   CodeXml,
   FileSpreadsheet,
   FlaskConical,
@@ -317,6 +318,13 @@ function Home({
           title="Mode developer"
           subtitle="Log, kode dan detail teknis lengkap"
           href="?view=studio-pro"
+        />
+        <Row
+          icon={CircleUserRound}
+          tone="plain"
+          title="Akun"
+          subtitle="Passkey, email cadangan dan keluar"
+          href="?view=akun"
         />
       </Group>
     </Screen>

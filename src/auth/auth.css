@@ -1,0 +1,30 @@
+/* Sign-in and account pages: built from the owner studio's iOS pieces (studio/studio.css). */
+
+.auth__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.auth__actions > .ios-btn {
+  width: 100%;
+}
+.auth__sent {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.auth__sent svg {
+  flex: none;
+  color: var(--tint);
+}
+.auth__sheet-lede {
+  color: var(--label-2);
+  font-size: 15px;
+}
+/* The sign-in screen has no dock, so it needs no room for one. */
+.auth .ios-screen {
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
