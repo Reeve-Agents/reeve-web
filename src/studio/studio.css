@@ -597,6 +597,30 @@ button.ios-row__hit:disabled {
   color: var(--on-tint) !important;
   cursor: pointer;
 }
+.ios-tool {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: var(--label-2) !important;
+  cursor: pointer;
+}
+.ios-tool.is-on {
+  background: var(--tint) !important;
+  color: var(--on-tint) !important;
+  animation: ios-pulse 1.2s ease-in-out infinite;
+}
+.ios-tool:disabled {
+  opacity: 0.35;
+}
+@keyframes ios-pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
 .ios-send:disabled {
   opacity: 0.35;
 }

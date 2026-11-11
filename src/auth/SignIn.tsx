@@ -71,10 +71,10 @@ export function SignIn(props: { emailLogin: boolean; onSignedIn: () => void }) {
 
           <div className="auth__actions">
             <Button icon={ScanFace} busy={busy === "passkey"} disabled={busy !== null} onClick={() => void run("passkey", auth.signInWithPasskey)}>
-              Masuk dengan passkey
+              Masuk
             </Button>
             <Button kind="tinted" icon={UserPlus} disabled={busy !== null} onClick={() => setCreating(true)}>
-              Buat akun baru
+              Mulai Gratis
             </Button>
           </div>
 

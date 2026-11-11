@@ -1,5 +1,6 @@
 import { startAuthentication } from "@simplewebauthn/browser";
 import { useCallback, useEffect, useState } from "react";
+import { csvFromFile, DATA_ACCEPT } from "./lib/extract";
 import { api, type DatasetSummary, type GenericOperationRecord, type RulebookRecord, type ToolCheck } from "./api";
 
 const rp = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
@@ -82,7 +83,8 @@ export function DataSource(props: { datasetId: string; onDataset: (id: string) =
   const upload = async (file: File) => {
     setError(null);
     try {
-      const d = await api.uploadDataset(file.name.replace(/\.csv$/i, ""), await file.text());
+      const { name, csv } = await csvFromFile(file);
+      const d = await api.uploadDataset(name, csv);
       load();
       props.onDataset(d.id);
     } catch (e) {
@@ -105,8 +107,8 @@ export function DataSource(props: { datasetId: string; onDataset: (id: string) =
           </select>
         </label>
         <label className="picker">
-          <span className="eyebrow">Or upload a CSV (export from Google Sheets or Excel)</span>
-          <input type="file" accept=".csv,text/csv" onChange={(e) => e.target.files?.[0] && void upload(e.target.files[0])} />
+          <span className="eyebrow">Or upload a CSV or Excel file</span>
+          <input type="file" accept={DATA_ACCEPT} onChange={(e) => e.target.files?.[0] && void upload(e.target.files[0])} />
         </label>
       </div>
       {error && <div className="error-bar">{error}</div>}
