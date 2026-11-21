@@ -7,6 +7,7 @@ import { AppsDirectory } from "./Apps";
 import { AccountPage } from "./auth/AccountPage";
 import { auth, emailLinkToken, watchForSignOut } from "./auth/session";
 import { SignIn } from "./auth/SignIn";
+import { ExplainPage } from "./explain/Explain";
 
 const view = () => new URLSearchParams(window.location.search).get("view");
 
@@ -19,6 +20,8 @@ function Root() {
     void auth.me().then((r) => setState({ signedIn: Boolean(r.account) && !emailLinkToken(), emailLogin: r.emailLogin }));
   }, []);
 
+  // The decision trace page is public: it shows only the pseudonymised Meko demo workspace.
+  if (view() === "jejak") return <ExplainPage />;
   if (state.signedIn === null) return <div className="auth-splash" aria-busy="true" />;
   if (!state.signedIn || view() === "masuk") {
     if (state.signedIn && view() === "masuk") window.history.replaceState(null, "", "/?view=studio");
