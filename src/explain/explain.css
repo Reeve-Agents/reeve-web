@@ -1,0 +1,272 @@
+/* Jejak keputusan: calm MP076 palette, filled groups and hairlines, no outlined boxes, one accent. */
+.jejak {
+  --j-bg: #000b16;
+  --j-fill: #001f3f;
+  --j-fill-2: #012a52;
+  --j-label: #f6f7ed;
+  --j-label-2: #b9bdb4;
+  --j-sep: #1c2f45;
+  --j-accent: #dbe64c;
+  --j-on-accent: #001f3f;
+  --j-blue: #1e488f;
+  --j-blue-text: #a9c1f2;
+  --j-bad: #c2413a;
+  --j-bad-text: #ff9b94;
+  min-height: 100svh;
+  background: var(--j-bg);
+  color: var(--j-label);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+}
+body:has(.jejak) {
+  background: #000b16;
+  margin: 0;
+}
+.jejak main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 8px 16px 64px;
+}
+.jejak-head {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+}
+.jejak-brand {
+  color: var(--j-label);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 18px;
+}
+.jejak-lang,
+.jejak-filter button {
+  min-height: 44px;
+  min-width: 44px;
+  border: 0;
+  border-radius: 22px;
+  padding: 0 16px;
+  background: var(--j-fill);
+  color: var(--j-label);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.jejak-filter {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 16px 0 8px;
+  padding-bottom: 4px;
+}
+.jejak-filter button.on {
+  background: var(--j-accent);
+  color: var(--j-on-accent);
+}
+.jejak h1 {
+  font-size: 28px;
+  line-height: 1.2;
+  margin: 12px 0 4px;
+}
+.jejak h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--j-label-2);
+  margin: 28px 0 8px;
+  font-weight: 600;
+}
+.jejak-sub {
+  color: var(--j-label-2);
+  margin: 0;
+}
+.jejak-report {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 0 18px;
+  border-radius: 22px;
+  background: var(--j-accent);
+  color: var(--j-on-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+.jejak-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--j-blue-text);
+  text-decoration: none;
+}
+.jejak-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--j-fill);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.jejak-rows li + li a {
+  box-shadow: inset 0 1px 0 var(--j-sep);
+}
+.jejak-rows a,
+.jejak-chain a {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 52px;
+  padding: 8px 14px;
+  color: var(--j-label);
+  text-decoration: none;
+}
+.jejak-row-main {
+  flex: 1;
+  min-width: 0;
+}
+.jejak-row-time {
+  color: var(--j-label-2);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.jejak-agent {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 2px 8px;
+  background: var(--j-blue);
+  color: var(--j-label);
+  min-width: 64px;
+  text-align: center;
+}
+.jejak-agent.a-owner {
+  background: var(--j-accent);
+  color: var(--j-on-accent);
+}
+.jejak-agent.a-auditor,
+.jejak-agent.a-validator {
+  background: #00545f;
+}
+.jejak-agent.a-ask {
+  background: #2a3b52;
+}
+.jejak-verdict {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.jejak-verdict.ok {
+  background: var(--j-fill-2);
+}
+.jejak-verdict.ok span {
+  color: var(--j-accent);
+}
+.jejak-verdict.bad {
+  background: var(--j-bad);
+  color: var(--j-label);
+}
+.jejak-bad {
+  color: var(--j-bad-text);
+}
+.jejak-why {
+  background: var(--j-fill);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 0;
+}
+.jejak-group {
+  background: var(--j-fill);
+  border-radius: 12px;
+  padding: 4px 0;
+  margin-bottom: 8px;
+}
+.jejak-query {
+  padding: 10px 14px 4px;
+  color: var(--j-blue-text);
+  font-weight: 600;
+}
+.jejak-line {
+  padding: 10px 14px;
+}
+.jejak-line + .jejak-line {
+  box-shadow: inset 0 1px 0 var(--j-sep);
+}
+.jejak-line.mute {
+  color: var(--j-label-2);
+}
+.jejak-line.mono {
+  font: 13px/1.4 ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--j-label-2);
+  word-break: break-all;
+}
+.jejak-line a {
+  color: var(--j-blue-text);
+}
+.jejak-line.check {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.jejak-line.check .yes {
+  color: var(--j-accent);
+  font-weight: 700;
+}
+.jejak-line.check .no {
+  color: var(--j-bad-text);
+  font-weight: 700;
+}
+.jejak-pre {
+  margin: 0;
+  padding: 10px 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: 13px/1.45 ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--j-label);
+}
+/* The chain is drawn as a line of steps, so its shape shows the order, not only its colours. */
+.jejak-chain {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 14px;
+  position: relative;
+}
+.jejak-chain::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  background: var(--j-sep);
+}
+.jejak-chain li {
+  position: relative;
+}
+.jejak-chain li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 21px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--j-blue);
+}
+.jejak-chain li.current::before {
+  background: var(--j-accent);
+  width: 14px;
+  height: 14px;
+  left: 0;
+  top: 19px;
+}
+.jejak-chain a {
+  padding-left: 26px;
+}
+.jejak-chain li.current a {
+  background: var(--j-fill);
+  border-radius: 12px;
+}

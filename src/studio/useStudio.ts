@@ -1,5 +1,6 @@
 import { startAuthentication, startRegistration } from "@simplewebauthn/browser";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { csvFromFile } from "../lib/extract";
 import { api, type DatasetSummary, type Health, type LedgerView, type PackId, type PackInfo, type ProviderInfo, type RulebookRecord, type RunRecord } from "../api";
 
 export const packOf = (rb: { pack?: PackId } | undefined | null): PackId => rb?.pack ?? "rent-collection";
@@ -146,7 +147,8 @@ export function useStudio() {
 
   const uploadCsv = (file: File) =>
     guard("upload", async () => {
-      const d = await api.uploadDataset(file.name.replace(/\.csv$/i, ""), await file.text());
+      const { name, csv } = await csvFromFile(file);
+      const d = await api.uploadDataset(name, csv);
       await loadDatasets();
       setDatasetId(d.id);
     });

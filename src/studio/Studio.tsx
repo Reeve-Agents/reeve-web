@@ -7,12 +7,15 @@ import {
   FlaskConical,
   ListChecks,
   MessageCircle,
+  Mic,
+  Paperclip,
   Play,
   Plug,
   ScanFace,
   ShieldCheck,
   Smartphone,
   Sparkles,
+  Square,
   Store,
   TriangleAlert,
   Upload,
@@ -20,6 +23,8 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type PackId } from "../api";
+import { DATA_ACCEPT, SOP_ACCEPT, sopTextFromFile } from "../lib/extract";
+import { useVoice } from "../lib/useVoice";
 import { plainRule, toolWords, type PlainRule } from "./plain";
 import { ApproveScreen, ProofScreen, TestScreen, summaryOf } from "./Steps";
 import { RunScreen } from "./Run";
@@ -355,7 +360,29 @@ function TellScreen({ s, go, back }: ScreenProps) {
     el.style.height = `${el.scrollHeight}px`;
   }, [s.sop, change, revising]);
 
+  const text = revising ? change : s.sop;
+  const setText = revising ? setChange : s.setSop;
+  const voice = useVoice(setText);
+  const sopFile = useRef<HTMLInputElement>(null);
+  const [reading, setReading] = useState(false);
+  useEffect(() => {
+    if (voice.error) s.setError(voice.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voice.error]);
+  const pickSopFile = async (f: File) => {
+    setReading(true);
+    try {
+      const t = await sopTextFromFile(f);
+      setText(text.trim() ? `${text.trim()}\n\n${t}` : t);
+    } catch (e) {
+      s.setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setReading(false);
+    }
+  };
+
   const send = () => {
+    if (voice.listening) voice.stop();
     if (revising) {
       const text = change.trim();
       if (!text) return;
@@ -383,10 +410,43 @@ function TellScreen({ s, go, back }: ScreenProps) {
               placeholder={
                 revising ? "Tulis perubahan…" : "Ceritakan cara kerja bisnismu…"
               }
-              value={revising ? change : s.sop}
-              onChange={(e) =>
-                revising ? setChange(e.target.value) : s.setSop(e.target.value)
-              }
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+            <button
+              type="button"
+              className="ios-tool"
+              onClick={() => sopFile.current?.click()}
+              disabled={reading}
+              aria-label="Unggah PDF atau Excel"
+              title="Unggah PDF atau Excel"
+            >
+              <Paperclip size={20} strokeWidth={2.2} />
+            </button>
+            {voice.supported && (
+              <button
+                type="button"
+                className={`ios-tool${voice.listening ? " is-on" : ""}`}
+                onClick={() => (voice.listening ? voice.stop() : voice.start(text))}
+                aria-label={voice.listening ? "Berhenti merekam" : "Bicara"}
+                aria-pressed={voice.listening}
+                title={voice.listening ? "Berhenti merekam" : "Bicara"}
+              >
+                {voice.listening ? <Square size={16} fill="currentColor" /> : <Mic size={20} strokeWidth={2.2} />}
+              </button>
+            )}
+            <input
+              ref={sopFile}
+              className="ios-hidden-input"
+              type="file"
+              accept={SOP_ACCEPT}
+              tabIndex={-1}
+              aria-hidden
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void pickSopFile(f);
+                e.target.value = "";
+              }}
             />
             <button
               type="button"
@@ -478,13 +538,13 @@ function TellScreen({ s, go, back }: ScreenProps) {
                 disabled={s.busy === "upload"}
               >
                 <Upload size={18} aria-hidden />{" "}
-                {s.busy === "upload" ? "Mengunggah…" : "File CSV"}
+                {s.busy === "upload" ? "Mengunggah…" : "CSV / Excel"}
               </button>
               <input
                 ref={file}
                 className="ios-hidden-input"
                 type="file"
-                accept=".csv,text/csv"
+                accept={DATA_ACCEPT}
                 tabIndex={-1}
                 aria-hidden
                 onChange={(e) => {
