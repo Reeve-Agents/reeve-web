@@ -184,3 +184,13 @@ button:disabled {
   border-radius: 12px;
   padding: 12px 16px;
 }
+.tm-tenant {
+  margin-top: 32px;
+}
+.tm-tenant .tm-text {
+  width: 72px;
+  margin: 0;
+}
+.tm-note code {
+  font-family: ui-monospace, "SF Mono", monospace;
+}

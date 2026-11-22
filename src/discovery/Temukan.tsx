@@ -180,6 +180,7 @@ export function TemukanPage() {
                 Pakai contoh Kos Melati
               </button>
             </div>
+            <TenantLink />
           </section>
         ) : (
           <>
@@ -318,6 +319,57 @@ function Done({ result, onAgain }: { result: Result; onAgain: () => void }) {
           Ulangi dengan file lain
         </button>
       </div>
+    </section>
+  );
+}
+
+/** "Kenapa saya didenda?": link one tenant's Telegram, or send the traced answer by wa.me yourself. */
+function TenantLink() {
+  const [subject, setSubject] = useState("K05");
+  const [out, setOut] = useState<{ url?: string | null; code?: string; wa?: string; text?: string } | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const post = async <T,>(path: string, body: unknown) => {
+    const res = await fetch(`/api/meko/owner${path}`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = (await res.json().catch(() => ({}))) as T & { error?: string };
+    if (!res.ok) throw new Error(j.error ?? `Gagal (${res.status})`);
+    return j;
+  };
+  const go = (fn: () => Promise<void>) => {
+    setErr(null);
+    fn().catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)));
+  };
+  return (
+    <section className="tm-tenant">
+      <h2>Penghuni bertanya "kenapa saya didenda?"</h2>
+      <p className="tm-note">Jawaban diambil dari jejak keputusan dan ledger, dengan tautan bukti. Reeve tidak mengirim WhatsApp sendiri: tautan wa.me Anda buka dan kirim sendiri.</p>
+      <div className="tm-actions">
+        <input className="tm-text" value={subject} onChange={(e) => setSubject(e.target.value.toUpperCase())} maxLength={4} aria-label="Kode penghuni" />
+        <button type="button" className="tm-secondary" onClick={() => go(async () => setOut(await post<{ url: string | null; code: string }>("/telegram/link", { subject })))}>
+          Tautan Telegram
+        </button>
+        <button type="button" className="tm-secondary" onClick={() => go(async () => {
+          const a = await post<{ wa_me: string; text: string }>("/explain/whatsapp", { subject, question: "Kenapa saya didenda?" });
+          setOut({ wa: a.wa_me, text: a.text });
+        })}>
+          Jawaban lewat WhatsApp
+        </button>
+      </div>
+      {err && <p className="jejak-verdict bad">{err}</p>}
+      {out?.code && (
+        <p className="tm-note">
+          {out.url ? <a href={out.url}>{out.url}</a> : <>Kirim <code>/start {out.code}</code> ke bot Telegram kos.</>} Berlaku 24 jam, sekali pakai.
+        </p>
+      )}
+      {out?.wa && (
+        <>
+          <blockquote className="tm-cite">{out.text}</blockquote>
+          <div className="tm-actions">
+            <a className="tm-primary" href={out.wa} target="_blank" rel="noreferrer">
+              Buka WhatsApp
+            </a>
+          </div>
+        </>
+      )}
     </section>
   );
 }
