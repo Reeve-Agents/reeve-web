@@ -121,6 +121,40 @@
 .kd-proposal p {
   margin: 0;
 }
+.kd-diff {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.kd-diff > div {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--j-fill-2);
+  min-width: 0;
+}
+.kd-diff-h {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--j-label-2);
+}
+.kd-diff-l {
+  margin: 0;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.kd-diff-l.after {
+  font-weight: 600;
+}
+.kd-line {
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .kd-diff {
+    grid-template-columns: 1fr;
+  }
+}
 .kd-locked {
   margin-top: 8px;
 }

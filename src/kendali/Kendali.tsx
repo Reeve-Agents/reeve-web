@@ -36,6 +36,32 @@ interface Cls {
   needs: number | null;
 }
 
+interface Replay {
+  bills: number;
+  before: { waived: number; diffs: number };
+  after: { waived: number; diffs: number };
+  new_diffs: number;
+}
+interface Amendment {
+  id: string;
+  rule_id: string;
+  status: "pending" | "approved" | "rejected";
+  path: "cloud" | "local";
+  decision_receipt?: string;
+  shortfall: { count: number; label: string };
+  diff: { before: string[]; after: string[]; summary: string; notes: string[] };
+  audit: { status: string; killed: number; total: number; cases: number };
+  evidence: string[];
+  receipts: { propose: string; audit: string };
+  improvement: { improved: boolean; summary: string; replay: Replay | null; search: { query: string; before: number; after: { hits: number; new: number } | null } } | null;
+}
+interface AmendList {
+  enabled: boolean;
+  items: Amendment[];
+  pending: number;
+  threshold: number;
+}
+
 const API = "/api/meko/owner";
 const LEVELS: Level[] = ["ask", "ask_if_unusual", "auto_digest", "auto"];
 const LEVEL_NAME: Record<Level, string> = {
@@ -59,12 +85,14 @@ export function KendaliPage() {
   const [items, setItems] = useState<Item[] | null>(null);
   const [classes, setClasses] = useState<Cls[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [amend, setAmend] = useState<AmendList | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [r, a] = await Promise.all([call<{ items: Item[] }>("/review"), call<{ classes: Cls[] }>("/autonomy")]);
+      const [r, a, m] = await Promise.all([call<{ items: Item[] }>("/review"), call<{ classes: Cls[] }>("/autonomy"), call<AmendList>("/amendments").catch(() => null)]);
       setItems(r.items);
       setClasses(a.classes);
+      setAmend(m);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -126,6 +154,8 @@ export function KendaliPage() {
           </details>
         )}
 
+        {amend?.enabled && <Amendments data={amend} onDone={load} />}
+
         <h2>Tangga otonomi</h2>
         <p className="jejak-why">Setiap jenis pekerjaan mulai dari “Tanya dulu”. Reeve baru boleh bertanya untuk naik setelah cukup bukti bersih, dan Anda selalu bisa menurunkannya lagi.</p>
         {!classes ? (
@@ -139,6 +169,132 @@ export function KendaliPage() {
         )}
       </main>
     </div>
+  );
+}
+
+function Amendments({ data, onDone }: { data: AmendList; onDone: () => Promise<void> }) {
+  const open = data.items.filter((a) => a.status === "pending");
+  const done = data.items.filter((a) => a.status !== "pending");
+  return (
+    <>
+      <h2>Usulan perubahan SOP</h2>
+      <p className="jejak-why">Kalau Anda memberi izin yang sama berulang kali (minimal {data.threshold} kali), Reeve mengusulkan mengubah aturannya. Usulan diuji dulu oleh Auditor. Tidak ada yang berubah sampai Anda menyetujui.</p>
+      {open.length === 0 ? (
+        <p className="tm-note">Belum ada usulan. Reeve baru mengusulkan setelah {data.threshold} izin yang sama.</p>
+      ) : (
+        <ul className="tm-cards kd-queue">
+          {open.map((a) => (
+            <AmendCard key={a.id} a={a} onDone={onDone} />
+          ))}
+        </ul>
+      )}
+      {done.length > 0 && (
+        <details className="kd-done">
+          <summary>Usulan yang sudah diputuskan ({done.length})</summary>
+          <ul className="tm-cards">
+            {done.map((a) => (
+              <AmendCard key={a.id} a={a} onDone={onDone} />
+            ))}
+          </ul>
+        </details>
+      )}
+    </>
+  );
+}
+
+function AmendCard({ a, onDone }: { a: Amendment; onDone: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState<{ receipt: string; approved: boolean } | null>(null);
+  const imp = a.improvement;
+  const rp = imp?.replay;
+
+  const decide = async (action: "approve" | "reject") => {
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await call<{ receipt: string }>(`/amendments/${a.id}/${action}`, {});
+      setSaved({ receipt: r.receipt, approved: action === "approve" });
+      await onDone();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const status = saved ? (saved.approved ? "approved" : "rejected") : a.status;
+  const receipt = saved?.receipt ?? a.decision_receipt;
+  return (
+    <li className={`tm-card kd-card${status === "approved" ? " yes" : status === "rejected" ? " no" : ""}`}>
+      <div className="tm-card-head">
+        <span className="tm-id">Aturan {a.rule_id}</span>
+        <span>{status === "pending" ? "Menunggu Anda" : status === "approved" ? "Disetujui" : "Ditolak"}</span>
+      </div>
+      <p className="tm-title">
+        {a.shortfall.count} {a.shortfall.label.replace("izin telat", "izin pemilik untuk aturan denda, telat")}
+      </p>
+      <p className="tm-evidence kd-rcpts">
+        Bukti izin:
+        {a.evidence.map((r, i) => (
+          <a key={r} href={jejak(r)} target="_blank" rel="noreferrer" className="kd-rcpt" aria-label={`Bukti izin ${i + 1}`}>
+            {i + 1}
+          </a>
+        ))}
+      </p>
+      <div className="kd-diff">
+        <div>
+          <p className="kd-diff-h">Sekarang</p>
+          {a.diff.before.map((l) => (
+            <p key={l} className="kd-diff-l before">
+              {l}
+            </p>
+          ))}
+        </div>
+        <div>
+          <p className="kd-diff-h">Usulan</p>
+          {a.diff.after.map((l) => (
+            <p key={l} className="kd-diff-l after">
+              {l}
+            </p>
+          ))}
+        </div>
+      </div>
+      <p className="kd-line">{a.diff.summary}</p>
+      {a.diff.notes.map((n) => (
+        <p key={n} className="tm-note">
+          {n}
+        </p>
+      ))}
+      <p className="kd-line">
+        <b>Uji Auditor:</b> {a.audit.killed}/{a.audit.total} cacat tertangkap · <a href={jejak(a.receipts.audit)} target="_blank" rel="noreferrer">lihat bukti uji</a>
+      </p>
+      {imp && (
+        <p className="kd-line">
+          <b>Dampak{rp ? `: ${rp.before.waived} → ${rp.after.waived} tagihan butuh izin` : ""}.</b> {imp.summary}
+          {imp.search.after ? ` Catatan izin serupa di memori Meko: ${imp.search.before} saat diusulkan, ${imp.search.after.new} yang baru sejak disetujui.` : ` Catatan izin serupa di memori Meko sekarang: ${imp.search.before}.`}
+        </p>
+      )}
+      {a.path === "cloud" && <p className="tm-note">Pola ini ditemukan lewat Meko Cloud.</p>}
+      {error && <p className="jejak-verdict bad">{error}</p>}
+      {status === "pending" ? (
+        <>
+          <p className="tm-note">Menyetujui hanya menyimpan versi baru SOP. Tidak ada pesan terkirim dan tidak ada tagihan yang diubah.</p>
+          <div className="tm-yesno">
+            <button type="button" className="tm-yes" disabled={busy} onClick={() => decide("approve")}>
+              Setujui
+            </button>
+            <button type="button" className="tm-no" disabled={busy} onClick={() => decide("reject")}>
+              Tolak
+            </button>
+          </div>
+        </>
+      ) : (
+        <p className="tm-answered kd-saved">
+          {status === "approved" ? "SOP versi baru tersimpan." : "SOP tidak berubah."} {receipt && <a href={jejak(receipt)}>lihat bukti</a>}
+        </p>
+      )}
+    </li>
   );
 }
 

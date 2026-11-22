@@ -116,6 +116,11 @@ const ACTION: Record<string, [string, string]> = {
   autonomy_promote: ["Level otonomi dinaikkan atas persetujuan pemilik", "Autonomy level raised with the owner's consent"],
   override: ["Pemilik menurunkan level otonomi", "Owner lowered the autonomy level"],
   discovery_blocked: ["SOP ditahan sampai lolos uji", "SOP held until it passes"],
+  owner_exception: ["Pemilik memberi pengecualian", "Owner made an exception"],
+  amend_propose: ["Usulan perubahan SOP dibuat", "SOP amendment proposed"],
+  amend_audit: ["Usulan perubahan SOP diuji", "SOP amendment audited"],
+  amend_approve: ["Perubahan SOP disetujui pemilik", "SOP amendment approved by the owner"],
+  amend_reject: ["Perubahan SOP ditolak pemilik", "SOP amendment rejected by the owner"],
 };
 
 const label = (m: Record<string, [string, string]>, k: string | undefined, l: Lang) => (k && m[k] ? m[k][l === "id" ? 0 : 1] : (k ?? "-"));
