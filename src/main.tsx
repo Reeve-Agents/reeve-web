@@ -8,6 +8,7 @@ import { AccountPage } from "./auth/AccountPage";
 import { auth, emailLinkToken, watchForSignOut } from "./auth/session";
 import { SignIn } from "./auth/SignIn";
 import { ExplainPage } from "./explain/Explain";
+import { TemukanPage } from "./discovery/Temukan";
 
 const view = () => new URLSearchParams(window.location.search).get("view");
 
@@ -39,6 +40,7 @@ function Root() {
   // ?view=apps and ?view=akun are kept outside App so the studio layout stays its own.
   if (view() === "apps") return <AppsDirectory />;
   if (view() === "akun") return <AccountPage />;
+  if (view() === "temukan") return <TemukanPage />;
   return <App />;
 }
 

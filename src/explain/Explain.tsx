@@ -101,6 +101,14 @@ const ACTION: Record<string, [string, string]> = {
   stop_playbook: ["Playbook berhenti sendiri", "Playbook stopped itself"],
   draft: ["Draf ditulis", "Draft written"],
   rapor: ["Rapor dibuat", "Report generated"],
+  mine_rules: ["Aturan ditemukan dari riwayat", "Rules mined from history"],
+  replay_history: ["Riwayat diuji ulang", "History replayed"],
+  replay_confirmed: ["Diuji ulang dengan aturan yang disetujui", "Replayed with confirmed rules"],
+  confirm_rule: ["Aturan disetujui pemilik", "Rule confirmed by the owner"],
+  reject_rule: ["Aturan ditolak pemilik", "Rule rejected by the owner"],
+  compile_discovered: ["SOP dari riwayat disusun", "Discovered SOP compiled"],
+  discovery_fallback: ["Tetap mode belajar", "Stays in learning mode"],
+  discovery_blocked: ["SOP ditahan sampai lolos uji", "SOP held until it passes"],
 };
 
 const label = (m: Record<string, [string, string]>, k: string | undefined, l: Lang) => (k && m[k] ? m[k][l === "id" ? 0 : 1] : (k ?? "-"));
