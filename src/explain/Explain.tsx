@@ -110,6 +110,11 @@ const ACTION: Record<string, [string, string]> = {
   discovery_fallback: ["Tetap mode belajar", "Stays in learning mode"],
   share_rapor: ["Rapor dibagikan", "Report shared"],
   revoke_share: ["Tautan rapor dicabut", "Report link revoked"],
+  review_approve: ["Draf disetujui pemilik", "Draft approved by the owner"],
+  review_reject: ["Draf ditolak pemilik", "Draft rejected by the owner"],
+  review_edit: ["Draf diubah dan disetujui pemilik", "Draft edited and approved by the owner"],
+  autonomy_promote: ["Level otonomi dinaikkan atas persetujuan pemilik", "Autonomy level raised with the owner's consent"],
+  override: ["Pemilik menurunkan level otonomi", "Owner lowered the autonomy level"],
   discovery_blocked: ["SOP ditahan sampai lolos uji", "SOP held until it passes"],
 };
 

@@ -5,6 +5,7 @@
 import { useState } from "react";
 import "../explain/explain.css";
 import "./temukan.css";
+import "../kendali/kendali.css";
 
 interface Cite {
   ref: string;
@@ -136,9 +137,14 @@ export function TemukanPage() {
         <a className="jejak-brand" href="/?view=studio">
           Reeve
         </a>
-        <a className="jejak-report" href="/?view=jejak">
-          Jejak keputusan
-        </a>
+        <nav className="kd-nav">
+          <a className="jejak-report" href="/?view=kendali">
+            Kendali
+          </a>
+          <a className="jejak-report" href="/?view=jejak">
+            Jejak keputusan
+          </a>
+        </nav>
       </header>
       <main>
         <h1>Temukan SOP dari kebiasaan Anda</h1>
