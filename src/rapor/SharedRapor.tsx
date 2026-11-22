@@ -41,6 +41,7 @@ const T = {
   local: ["hanya di ledger lokal, belum di chain", "local ledger only, not on chain yet"],
   calldata: ["Calldata yang harus ada di transaksi", "Calldata the transaction must carry"],
   match: ["Angka rapor vs keputusan di ledger", "Report numbers vs decisions in the ledger"],
+  format: ["Setiap transaksi anchor membawa calldata 0x524545564531 (\"REEVE1\") + Merkle root (32 byte) + jumlah leaf (uint32). Leaf = receipt run dan hash baris keputusan sebelum anchor, urut ledger; tiap leaf di-SHA-256 dulu, pasangan = SHA-256(kiri || kanan), node ganjil dipasangkan dengan dirinya sendiri.", ""],
   gone: ["Tautan ini tidak berlaku. Mungkin sudah dicabut pemilik.", "This link is not valid. The owner may have revoked it."],
 } as const;
 
@@ -182,7 +183,7 @@ export function SharedRaporPage() {
                     </p>
                   </div>
                 ))}
-                <p className="jejak-line mute">{data.anchor_format.note}</p>
+                <p className="jejak-line mute">{lang === "id" ? T.format[0] : data.anchor_format.note}</p>
               </div>
             )}
           </>
