@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import "../explain/explain.css";
 import "../discovery/temukan.css";
 import "./kendali.css";
+import { DigestSection, OutboxSection } from "./Tenang";
 
 interface Hit {
   rule: string;
@@ -124,6 +125,9 @@ export function KendaliPage() {
         <h1>Kendali</h1>
         <p className="jejak-sub">Tinjau draf sebelum keluar, dan atur seberapa jauh Reeve boleh jalan sendiri. Setiap ketukan tercatat sebagai bukti.</p>
         {error && <p className="jejak-verdict bad">{error}</p>}
+
+        <DigestSection />
+        <OutboxSection />
 
         <h2>Antrean tinjauan</h2>
         {!items ? (

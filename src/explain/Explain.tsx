@@ -121,6 +121,10 @@ const ACTION: Record<string, [string, string]> = {
   amend_audit: ["Usulan perubahan SOP diuji", "SOP amendment audited"],
   amend_approve: ["Perubahan SOP disetujui pemilik", "SOP amendment approved by the owner"],
   amend_reject: ["Perubahan SOP ditolak pemilik", "SOP amendment rejected by the owner"],
+  auto_stage: ["Tindakan menunggu 10 menit, masih bisa dibatalkan", "Action staged for 10 minutes, can still be undone"],
+  auto_run: ["Tindakan jalan sendiri setelah 10 menit", "Action ran by itself after 10 minutes"],
+  undo: ["Pemilik membatalkan, level otonomi turun", "Owner undid it, autonomy level dropped"],
+  send_digest: ["Ringkasan harian untuk pemilik", "Daily digest for the owner"],
 };
 
 const label = (m: Record<string, [string, string]>, k: string | undefined, l: Lang) => (k && m[k] ? m[k][l === "id" ? 0 : 1] : (k ?? "-"));

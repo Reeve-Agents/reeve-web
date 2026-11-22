@@ -164,3 +164,41 @@
   align-items: center;
   gap: 0 4px;
 }
+
+/* Ketenangan pemilik: ringkasan harian dan jendela batal 10 menit. */
+.kd-calm {
+  margin-bottom: 8px;
+}
+.kd-digest {
+  margin: 8px 0 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--j-fill-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.kd-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 16px;
+  text-decoration: none;
+}
+.kd-channel {
+  margin-top: 12px;
+}
+.kd-count {
+  margin: 8px 0 0;
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.kd-outbox {
+  margin-bottom: 8px;
+}
