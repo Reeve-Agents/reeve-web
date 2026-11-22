@@ -9,6 +9,7 @@ import { auth, emailLinkToken, watchForSignOut } from "./auth/session";
 import { SignIn } from "./auth/SignIn";
 import { ExplainPage } from "./explain/Explain";
 import { TemukanPage } from "./discovery/Temukan";
+import { SharedRaporPage } from "./rapor/SharedRapor";
 
 const view = () => new URLSearchParams(window.location.search).get("view");
 
@@ -23,6 +24,8 @@ function Root() {
 
   // The decision trace page is public: it shows only the pseudonymised Meko demo workspace.
   if (view() === "jejak") return <ExplainPage />;
+  // A Rapor the owner shared: metrics only, verified in the browser.
+  if (view() === "rapor") return <SharedRaporPage />;
   if (state.signedIn === null) return <div className="auth-splash" aria-busy="true" />;
   if (!state.signedIn || view() === "masuk") {
     if (state.signedIn && view() === "masuk") window.history.replaceState(null, "", "/?view=studio");

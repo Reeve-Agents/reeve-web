@@ -194,3 +194,8 @@ button:disabled {
 .tm-note code {
   font-family: ui-monospace, "SF Mono", monospace;
 }
+.tm-tenant .tm-text.tm-wide {
+  width: auto;
+  flex: 1;
+  min-width: 180px;
+}

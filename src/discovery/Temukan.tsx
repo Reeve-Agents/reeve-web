@@ -181,6 +181,7 @@ export function TemukanPage() {
               </button>
             </div>
             <TenantLink />
+            <ShareRapor />
           </section>
         ) : (
           <>
@@ -369,6 +370,75 @@ function TenantLink() {
             </a>
           </div>
         </>
+      )}
+    </section>
+  );
+}
+
+interface Share {
+  subject: string;
+  created_at: string;
+  active: boolean;
+  receipt: string;
+}
+
+/** Rapor Usaha share links: metrics only, revocable; whether a link works is read from the ledger. */
+function ShareRapor() {
+  const [label, setLabel] = useState("");
+  const [shares, setShares] = useState<Share[] | null>(null);
+  const [made, setMade] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const req = async <T,>(path: string, body?: unknown) => {
+    const res = await fetch(`/api/meko/owner/rapor${path}`, { method: body === undefined ? "GET" : "POST", credentials: "include", headers: body === undefined ? undefined : { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+    const j = (await res.json().catch(() => ({}))) as T & { error?: string };
+    if (!res.ok) throw new Error(j.error ?? `Gagal (${res.status})`);
+    return j;
+  };
+  const refresh = async () => setShares((await req<{ shares: Share[] }>("/shares")).shares);
+  const go = (fn: () => Promise<void>) => {
+    setErr(null);
+    fn().catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)));
+  };
+  return (
+    <section className="tm-tenant">
+      <h2>Bagikan Rapor Usaha</h2>
+      <p className="tm-note">Tautan hanya berisi angka, tanpa nama penghuni dan isi percakapan. Penerima bisa menghitung ulang buktinya di browser. Bisa dicabut kapan saja.</p>
+      <div className="tm-actions">
+        <input className="tm-text tm-wide" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={60} placeholder="Untuk siapa (mis. Bank BPR)" aria-label="Untuk siapa" />
+        <button type="button" className="tm-secondary" onClick={() => go(async () => {
+          const s = await req<{ url: string }>("/share", { label: label || undefined });
+          setMade(s.url);
+          await refresh();
+        })}>
+          Buat tautan
+        </button>
+        <button type="button" className="tm-secondary" onClick={() => go(refresh)}>
+          Lihat tautan
+        </button>
+      </div>
+      {err && <p className="jejak-verdict bad">{err}</p>}
+      {made && (
+        <p className="tm-note">
+          Tautan baru (simpan sekarang, tidak ditampilkan lagi): <a href={made}>{made}</a>
+        </p>
+      )}
+      {shares && (
+        <ul className="tm-rules">
+          {shares.length === 0 && <li>Belum ada tautan.</li>}
+          {shares.map((s) => (
+            <li key={s.subject}>
+              {new Date(s.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} · {s.active ? "aktif" : "dicabut"} · <a href={`/?view=jejak&receipt=${s.receipt}`}>bukti</a>{" "}
+              {s.active && (
+                <button type="button" className="tm-no" onClick={() => go(async () => {
+                  await req("/revoke", { subject: s.subject });
+                  await refresh();
+                })}>
+                  Cabut
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );

@@ -108,6 +108,8 @@ const ACTION: Record<string, [string, string]> = {
   reject_rule: ["Aturan ditolak pemilik", "Rule rejected by the owner"],
   compile_discovered: ["SOP dari riwayat disusun", "Discovered SOP compiled"],
   discovery_fallback: ["Tetap mode belajar", "Stays in learning mode"],
+  share_rapor: ["Rapor dibagikan", "Report shared"],
+  revoke_share: ["Tautan rapor dicabut", "Report link revoked"],
   discovery_blocked: ["SOP ditahan sampai lolos uji", "SOP held until it passes"],
 };
 
