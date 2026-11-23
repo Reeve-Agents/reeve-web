@@ -69,6 +69,8 @@ const T = {
   viaLog: ["Tidak terkirim: dicatat di connector Log, belum ada kanal pesan yang tersambung.", "Not sent: recorded on the Log connector, no messaging channel is connected yet."],
   viaStaged: ["Disiapkan, menunggu 10 menit jendela batal sebelum dijalankan.", "Staged: waits out the 10-minute undo window before it runs."],
   viaTelegram: ["Terkirim lewat Telegram.", "Sent on Telegram."],
+  viaComposio: ["Dijalankan sungguhan lewat Composio (misalnya dibuat di Google Calendar).", "Ran for real through Composio (for example created in Google Calendar)."],
+  viaFailed: ["Gagal dijalankan; keputusan ini mencatat kegagalannya.", "Failed to run; this decision records the failure."],
   demoApproval: ["Persetujuan demo dari skrip seed, tanpa passkey. Persetujuan passkey sungguhan ada di studio.", "Demo approval from the seed script, no passkey. Real passkey approval lives in the studio."],
   demoSim: ["Pesan memakai connector Log (tidak terkirim), deposit memakai rail tiruan, dan persetujuan pemilik bertanda demo.", "Messages use the Log connector (not sent), the deposit uses a mock rail, and owner approvals are marked demo."],
 } as const;
@@ -94,6 +96,7 @@ const ACTION: Record<string, [string, string]> = {
   ask_owner: ["Tanya pemilik dulu", "Asked the owner"],
   deposit_bill: ["Tagih deposit", "Deposit bill"],
   book_viewing: ["Jadwal survei", "Viewing booked"],
+  book_viewing_failed: ["Jadwal survei gagal dibuat", "Viewing booking failed"],
   contract_draft: ["Draf kontrak", "Contract draft"],
   accept_tenant: ["Penghuni diterima", "Tenant accepted"],
   publish: ["Terbit", "Published"],
@@ -200,7 +203,7 @@ function chainName(explorer: string | undefined): string {
 
 /** Plain notes on what a decision did NOT do for real: a Log send, a staged action, a demo approval. */
 function honesty(json: string | undefined, l: Lang): string[] {
-  let o: { via?: unknown; method?: unknown } = {};
+  let o: { via?: unknown; method?: unknown; error?: unknown } = {};
   try {
     o = JSON.parse(json ?? "{}") ?? {};
   } catch {
@@ -210,6 +213,7 @@ function honesty(json: string | undefined, l: Lang): string[] {
   if (o.via === "log") notes.push(tr(T.viaLog, l));
   if (o.via === "staged") notes.push(tr(T.viaStaged, l));
   if (o.via === "telegram") notes.push(tr(T.viaTelegram, l));
+  if (o.via === "composio") notes.push(tr(o.error ? T.viaFailed : T.viaComposio, l));
   if (o.method === "demo") notes.push(tr(T.demoApproval, l));
   return notes;
 }
