@@ -1,0 +1,36 @@
+/* Shared Rapor Usaha: number tiles on filled groups, same palette as Jejak keputusan. */
+.rp-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.rp-grid li {
+  background: var(--j-fill);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rp-num {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.rp-label,
+.rp-mute {
+  color: var(--j-label-2);
+  font-size: 14px;
+}
+.rapor .jejak-line.mono {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.rapor .jejak-line code {
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 12px;
+  color: var(--j-label-2);
+}

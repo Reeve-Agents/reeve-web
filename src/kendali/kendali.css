@@ -1,0 +1,204 @@
+/* Kendali: review queue and autonomy ladder. Reuses the Temukan card and button classes. */
+.kd-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  justify-content: flex-end;
+}
+.kd-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.kd-queue,
+.kd-ladder {
+  margin-bottom: 8px;
+}
+.kd-draft {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--j-fill-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+.kd-text {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--j-fill-2);
+  color: var(--j-label);
+  font: inherit;
+  font-size: 16px;
+  resize: vertical;
+}
+.kd-hits {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kd-hits li {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, #d97706 16%, transparent);
+  font-size: 14px;
+}
+.kd-three button {
+  min-width: 0;
+}
+.kd-saved {
+  margin-top: 12px;
+}
+.kd-done {
+  margin-top: 16px;
+}
+.kd-done summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--j-label-2);
+}
+.kd-done .tm-cards {
+  margin-top: 8px;
+}
+.kd-steps {
+  list-style: none;
+  margin: 12px 0 8px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.kd-steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--j-label-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.kd-dot {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--j-fill-2);
+}
+.kd-steps li.on .kd-dot {
+  background: var(--j-blue-text);
+}
+.kd-steps li.now {
+  color: var(--j-label);
+  font-weight: 600;
+}
+.kd-steps li.off {
+  opacity: 0.45;
+}
+.kd-rcpt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--j-blue-text);
+}
+.kd-proposal {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--j-fill-2);
+}
+.kd-proposal p {
+  margin: 0;
+}
+.kd-diff {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.kd-diff > div {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--j-fill-2);
+  min-width: 0;
+}
+.kd-diff-h {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--j-label-2);
+}
+.kd-diff-l {
+  margin: 0;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.kd-diff-l.after {
+  font-weight: 600;
+}
+.kd-line {
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .kd-diff {
+    grid-template-columns: 1fr;
+  }
+}
+.kd-locked {
+  margin-top: 8px;
+}
+.kd-rcpts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 4px;
+}
+
+/* Ketenangan pemilik: ringkasan harian dan jendela batal 10 menit. */
+.kd-calm {
+  margin-bottom: 8px;
+}
+.kd-digest {
+  margin: 8px 0 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--j-fill-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.kd-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 16px;
+  text-decoration: none;
+}
+.kd-channel {
+  margin-top: 12px;
+}
+.kd-count {
+  margin: 8px 0 0;
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.kd-outbox {
+  margin-bottom: 8px;
+}
