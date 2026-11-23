@@ -53,6 +53,9 @@ body:has(.jejak) {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  /* Keep each chip whole on a phone: the row scrolls sideways instead of squeezing labels. */
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 .jejak-filter {
   display: flex;
@@ -60,6 +63,15 @@ body:has(.jejak) {
   overflow-x: auto;
   margin: 16px 0 8px;
   padding-bottom: 4px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.jejak-filter::-webkit-scrollbar {
+  display: none;
+}
+.jejak-filter button {
+  scroll-snap-align: start;
 }
 .jejak-filter button.on {
   background: var(--j-accent);
