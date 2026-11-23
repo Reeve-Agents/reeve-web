@@ -9,6 +9,7 @@ import { auth, emailLinkToken, watchForSignOut } from "./auth/session";
 import { SignIn } from "./auth/SignIn";
 import { ExplainPage } from "./explain/Explain";
 import { TemukanPage } from "./discovery/Temukan";
+import { KendaliPage } from "./kendali/Kendali";
 import { SharedRaporPage } from "./rapor/SharedRapor";
 
 const view = () => new URLSearchParams(window.location.search).get("view");
@@ -44,6 +45,7 @@ function Root() {
   if (view() === "apps") return <AppsDirectory />;
   if (view() === "akun") return <AccountPage />;
   if (view() === "temukan") return <TemukanPage />;
+  if (view() === "kendali") return <KendaliPage />;
   return <App />;
 }
 

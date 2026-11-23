@@ -110,7 +110,21 @@ const ACTION: Record<string, [string, string]> = {
   discovery_fallback: ["Tetap mode belajar", "Stays in learning mode"],
   share_rapor: ["Rapor dibagikan", "Report shared"],
   revoke_share: ["Tautan rapor dicabut", "Report link revoked"],
+  review_approve: ["Draf disetujui pemilik", "Draft approved by the owner"],
+  review_reject: ["Draf ditolak pemilik", "Draft rejected by the owner"],
+  review_edit: ["Draf diubah dan disetujui pemilik", "Draft edited and approved by the owner"],
+  autonomy_promote: ["Level otonomi dinaikkan atas persetujuan pemilik", "Autonomy level raised with the owner's consent"],
+  override: ["Pemilik menurunkan level otonomi", "Owner lowered the autonomy level"],
   discovery_blocked: ["SOP ditahan sampai lolos uji", "SOP held until it passes"],
+  owner_exception: ["Pemilik memberi pengecualian", "Owner made an exception"],
+  amend_propose: ["Usulan perubahan SOP dibuat", "SOP amendment proposed"],
+  amend_audit: ["Usulan perubahan SOP diuji", "SOP amendment audited"],
+  amend_approve: ["Perubahan SOP disetujui pemilik", "SOP amendment approved by the owner"],
+  amend_reject: ["Perubahan SOP ditolak pemilik", "SOP amendment rejected by the owner"],
+  auto_stage: ["Tindakan menunggu 10 menit, masih bisa dibatalkan", "Action staged for 10 minutes, can still be undone"],
+  auto_run: ["Tindakan jalan sendiri setelah 10 menit", "Action ran by itself after 10 minutes"],
+  undo: ["Pemilik membatalkan, level otonomi turun", "Owner undid it, autonomy level dropped"],
+  send_digest: ["Ringkasan harian untuk pemilik", "Daily digest for the owner"],
 };
 
 const label = (m: Record<string, [string, string]>, k: string | undefined, l: Lang) => (k && m[k] ? m[k][l === "id" ? 0 : 1] : (k ?? "-"));
