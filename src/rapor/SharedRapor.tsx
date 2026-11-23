@@ -18,6 +18,7 @@ interface Shared {
     totals: { decisions: number; verified: number; tampered: number; anchored: number; by_agent: Record<string, number>; by_action: Record<string, number> };
     usaha: Record<string, number | { count: number; amount_idr: number }>;
     tokens: { llm_input: number; llm_output: number; context_tokens_saved: number; lookups: number; worker_calls: number };
+    savings?: { events: number; baseline_input: number; reeve_input: number; saved: number; ratio: number | null; baseline_per_event: number };
   };
   traces: { receipt: string; verified: boolean }[];
   ledger: LedgerEntry[];
@@ -138,6 +139,12 @@ export function SharedRaporPage() {
                 <span className="rp-num">{(r.tokens.llm_input + r.tokens.llm_output).toLocaleString("id-ID")}</span>
                 <span className="rp-label">Token</span>
               </li>
+              {r.savings && r.savings.ratio ? (
+                <li>
+                  <span className="rp-num">{r.savings.ratio}×</span>
+                  <span className="rp-label">{lang === "id" ? "Hemat token input vs konteks penuh (dihitung dari catatan Reeve)" : "Input tokens saved vs full context (computed from Reeve's records)"}</span>
+                </li>
+              ) : null}
             </ul>
 
             <h2>{tr(T.proof, lang)}</h2>
