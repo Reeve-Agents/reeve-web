@@ -64,6 +64,13 @@ const T = {
     trace_matches: ["Hash jejak cocok", "Trace hash matches"],
     anchored: ["Masuk Merkle root yang di-anchor", "Inside an anchored Merkle root"],
   },
+  anchoredLocal: ["Masuk Merkle root lokal (belum di-anchor on-chain)", "Inside a local Merkle root (not anchored on-chain yet)"],
+  anchoredChain: ["Di-anchor on-chain (Monad testnet)", "Anchored on-chain (Monad testnet)"],
+  viaLog: ["Tidak terkirim: dicatat di connector Log, belum ada kanal pesan yang tersambung.", "Not sent: recorded on the Log connector, no messaging channel is connected yet."],
+  viaStaged: ["Disiapkan, menunggu 10 menit jendela batal sebelum dijalankan.", "Staged: waits out the 10-minute undo window before it runs."],
+  viaTelegram: ["Terkirim lewat Telegram.", "Sent on Telegram."],
+  demoApproval: ["Persetujuan demo dari skrip seed, tanpa passkey. Persetujuan passkey sungguhan ada di studio.", "Demo approval from the seed script, no passkey. Real passkey approval lives in the studio."],
+  demoSim: ["Pesan memakai connector Log (tidak terkirim), deposit memakai rail tiruan, dan persetujuan pemilik bertanda demo.", "Messages use the Log connector (not sent), the deposit uses a mock rail, and owner approvals are marked demo."],
 } as const;
 
 const AGENT: Record<string, [string, string]> = {
@@ -178,6 +185,22 @@ function MemoryLine({ text, count }: { text: string; count: number }) {
   );
 }
 
+/** Plain notes on what a decision did NOT do for real: a Log send, a staged action, a demo approval. */
+function honesty(json: string | undefined, l: Lang): string[] {
+  let o: { via?: unknown; method?: unknown } = {};
+  try {
+    o = JSON.parse(json ?? "{}") ?? {};
+  } catch {
+    return [];
+  }
+  const notes: string[] = [];
+  if (o.via === "log") notes.push(tr(T.viaLog, l));
+  if (o.via === "staged") notes.push(tr(T.viaStaged, l));
+  if (o.via === "telegram") notes.push(tr(T.viaTelegram, l));
+  if (o.method === "demo") notes.push(tr(T.demoApproval, l));
+  return notes;
+}
+
 function pretty(json: string | undefined): string {
   if (!json) return "";
   try {
@@ -253,7 +276,7 @@ function List({ lang }: { lang: Lang }) {
       )}
       {ranOn && (
         <p className="jejak-note">
-          {tr(T.demo, lang)} {ranOn}. {tr(T.demoTail, lang)}
+          {tr(T.demo, lang)} {ranOn}. {tr(T.demoTail, lang)} {tr(T.demoSim, lang)}
         </p>
       )}
       <div className="jejak-filter" role="tablist">
@@ -363,6 +386,11 @@ function One({ receipt, lang }: { receipt: string; lang: Lang }) {
         <div className="jejak-line mute">{tr(T.input, lang)}</div>
         <pre className="jejak-pre">{d.trace?.input}</pre>
         <pre className="jejak-pre">{pretty(d.trace?.output)}</pre>
+        {honesty(d.trace?.output, lang).map((note) => (
+          <div className="jejak-line mute" key={note}>
+            {note}
+          </div>
+        ))}
       </div>
 
       <h2>{tr(T.chain, lang)}</h2>
@@ -383,10 +411,12 @@ function One({ receipt, lang }: { receipt: string; lang: Lang }) {
         {(Object.keys(T.checks) as (keyof typeof T.checks)[]).map((k) => {
           const val = v.checks[k];
           const pass = k === "anchored" ? !!v.checks.anchored?.proof_ok : !!val;
+          // A Merkle root is only "anchored" in the strong sense when a transaction carries it on chain.
+          const text = k !== "anchored" || !pass ? tr(T.checks[k], lang) : v.checks.anchored?.tx || v.checks.anchored?.explorer ? tr(T.anchoredChain, lang) : tr(T.anchoredLocal, lang);
           return (
             <div className="jejak-line check" key={k}>
               <span className={pass ? "yes" : "no"} aria-hidden="true">{pass ? "✓" : "✕"}</span>
-              {tr(T.checks[k], lang)}
+              {text}
             </div>
           );
         })}
