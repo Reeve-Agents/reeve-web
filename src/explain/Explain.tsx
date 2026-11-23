@@ -48,6 +48,15 @@ const T = {
   input: ["Masukan", "Input"],
   all: ["Semua", "All"],
   loading: ["Memuat…", "Loading…"],
+  start: ["Mulai di sini", "Start here"],
+  demo: ["Data demo: satu simulasi usaha kos selama sebulan, dijalankan sekaligus pada", "Demo data: one simulated month of a kos business, run in one go on"],
+  demoTail: ["Jam di daftar ini adalah saat simulasi dijalankan, bukan tanggal usaha.", "Times in this list are when the simulation ran, not business dates."],
+  bizDate: ["Tanggal usaha", "Business date"],
+  ran: ["dijalankan", "run"],
+  hits: ["hasil", "results"],
+  unique: ["unik", "unique"],
+  noneFor: ["Tidak ada memori tentang", "No memory about"],
+  others: ["hasil lain, bukan tentang", "other results, not about"],
   checks: {
     in_ledger: ["Receipt ada di ledger", "Receipt is in the ledger"],
     ledger_intact: ["Rantai hash ledger utuh", "Ledger hash chain intact"],
@@ -71,6 +80,8 @@ const ACTION: Record<string, [string, string]> = {
   charge_fee: ["Denda telat bayar", "Late fee"],
   hold: ["Denda ditahan (izin pemilik)", "Fee held (owner exception)"],
   remind: ["Pengingat bayar", "Payment reminder"],
+  remind_staged: ["Pengingat bayar disiapkan, bisa dibatalkan 10 menit", "Payment reminder staged, 10 minutes to undo"],
+  notice: ["Surat peringatan", "Formal notice"],
   reply: ["Balas calon penghuni", "Reply to a prospect"],
   escalate: ["Diteruskan ke pemilik", "Sent to the owner"],
   ask_owner: ["Tanya pemilik dulu", "Asked the owner"],
@@ -132,6 +143,41 @@ const tr = (pair: readonly [string, string], l: Lang) => pair[l === "id" ? 0 : 1
 const when = (iso: string) => new Date(iso).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
 const short = (h: string) => `${h.slice(0, 10)}…${h.slice(-6)}`;
 
+/** The three decisions a judge should open first: a fee, a fee held by an owner exception, and the tenant's own question. */
+const STORIES: { action: string; subject: string; q: [string, string] }[] = [
+  { action: "charge_fee", subject: "K05", q: ["Kenapa K05 kena denda telat bayar?", "Why was K05 charged a late fee?"] },
+  { action: "hold", subject: "K03", q: ["Kenapa denda K03 ditahan?", "Why was K03's fee held?"] },
+  { action: "explain", subject: "K05", q: ["Penghuni bertanya: \"kenapa saya didenda?\"", "The tenant asks: \"why was I fined?\""] },
+];
+
+/** Matches memory text about one room: "K05" or "kamar 5", never "kamar 50". */
+function roomMatcher(subject: string | undefined): RegExp | null {
+  const n = subject?.match(/^K0*(\d+)$/i)?.[1];
+  return n ? new RegExp(`\\bK0*${n}\\b|\\bkamar\\s+${n}\\b`, "i") : null;
+}
+
+/** The simulated business date the agent decided on, when its input states one ("hari ini 2026-12-08"). */
+function businessDate(input: string | undefined, l: Lang): string | null {
+  const iso = input?.match(/hari ini (\d{4}-\d{2}-\d{2})/)?.[1];
+  return iso ? new Date(`${iso}T00:00:00`).toLocaleDateString(l === "id" ? "id-ID" : "en-GB", { dateStyle: "medium" }) : null;
+}
+
+/** Same memory text counted once, with how many times Meko returned it. */
+function dedupe(memory: { id: string; text: string }[]): { text: string; count: number }[] {
+  const m = new Map<string, number>();
+  for (const x of memory) m.set(x.text.trim(), (m.get(x.text.trim()) ?? 0) + 1);
+  return [...m].map(([text, count]) => ({ text, count }));
+}
+
+function MemoryLine({ text, count }: { text: string; count: number }) {
+  return (
+    <div className="jejak-line">
+      {text}
+      {count > 1 && <span className="jejak-count">×{count}</span>}
+    </div>
+  );
+}
+
 function pretty(json: string | undefined): string {
   if (!json) return "";
   try {
@@ -164,12 +210,24 @@ function List({ lang }: { lang: Lang }) {
   const [items, setItems] = useState<Item[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [agent, setAgent] = useState<string>("");
+  const [all, setAll] = useState<Item[] | null>(null);
   useEffect(() => {
     fetch(`${API}/decisions${agent ? `?agent=${agent}` : ""}`)
       .then((r) => r.json())
-      .then((b: { decisions?: Item[]; error?: string }) => (b.error ? setError(b.error) : setItems(b.decisions ?? [])))
+      .then((b: { decisions?: Item[]; error?: string }) => {
+        if (b.error) return setError(b.error);
+        setItems(b.decisions ?? []);
+        if (!agent) setAll(b.decisions ?? []);
+      })
       .catch((e: Error) => setError(e.message));
   }, [agent]);
+  const q = lang === "en" ? "&lang=en" : "";
+  const stories = all ? STORIES.flatMap((s) => {
+    const hit = all.find((d) => d.action === s.action && d.subject === s.subject);
+    return hit ? [{ ...s, receipt: hit.receipt }] : [];
+  }) : [];
+  const first = all?.at(-1);
+  const ranOn = first ? new Date(first.at).toLocaleDateString(lang === "id" ? "id-ID" : "en-GB", { dateStyle: "medium" }) : null;
   return (
     <main>
       <h1>{tr(T.title, lang)}</h1>
@@ -177,6 +235,27 @@ function List({ lang }: { lang: Lang }) {
       <a className="jejak-report" href={`${API}/report.html${lang === "en" ? "?lang=en" : ""}`}>
         {tr(T.report, lang)}
       </a>
+      {stories.length > 0 && (
+        <>
+          <h2>{tr(T.start, lang)}</h2>
+          <ol className="jejak-start">
+            {stories.map((s, i) => (
+              <li key={s.receipt}>
+                <a href={`/?view=jejak&receipt=${s.receipt}${q}`}>
+                  <span className="jejak-start-n">{i + 1}</span>
+                  <span className="jejak-row-main">{tr(s.q, lang)}</span>
+                  <span aria-hidden="true">›</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+      {ranOn && (
+        <p className="jejak-note">
+          {tr(T.demo, lang)} {ranOn}. {tr(T.demoTail, lang)}
+        </p>
+      )}
       <div className="jejak-filter" role="tablist">
         {["", "operator", "owner", "auditor", "builder", "ask"].map((a) => (
           <button key={a} type="button" role="tab" aria-selected={agent === a} className={agent === a ? "on" : ""} onClick={() => setAgent(a)}>
@@ -217,6 +296,9 @@ function One({ receipt, lang }: { receipt: string; lang: Lang }) {
   if (!d) return <main><p className="jejak-sub">{tr(T.loading, lang)}</p></main>;
   const v = d.verify;
   const seen = d.trace?.seen ?? [];
+  const subj = d.decision.subject;
+  const room = roomMatcher(subj);
+  const biz = businessDate(d.trace?.input, lang);
   return (
     <main>
       <a className="jejak-back" href={`/?view=jejak${lang === "en" ? "&lang=en" : ""}`}>
@@ -225,7 +307,8 @@ function One({ receipt, lang }: { receipt: string; lang: Lang }) {
       <h1>{label(ACTION, d.decision.action, lang)}</h1>
       <p className="jejak-sub">
         {label(AGENT, d.decision.agent, lang)}
-        {d.decision.subject ? ` · ${d.decision.subject}` : ""} · {when(d.decision.at)}
+        {subj ? ` · ${subj}` : ""}
+        {biz ? ` · ${tr(T.bizDate, lang)} ${biz} · ${tr(T.ran, lang)} ${when(d.decision.at)}` : ` · ${when(d.decision.at)}`}
       </p>
       <p className={v.ok ? "jejak-verdict ok" : "jejak-verdict bad"}>
         <span aria-hidden="true">{v.ok ? "✓" : "✕"}</span> {v.ok ? tr(T.ok, lang) : v.problem}
@@ -236,17 +319,44 @@ function One({ receipt, lang }: { receipt: string; lang: Lang }) {
 
       <h2>{tr(T.looked, lang)}</h2>
       {seen.length === 0 && <p className="jejak-sub">{tr(T.nothing, lang)}</p>}
-      {seen.map((s, i) => (
-        <div className="jejak-group" key={i}>
-          <div className="jejak-query">“{s.query}”</div>
-          {s.memory.length === 0 && <div className="jejak-line mute">—</div>}
-          {s.memory.map((m) => (
-            <div className="jejak-line" key={m.id}>
-              {m.text}
+      {seen.map((s, i) => {
+        // Every hit stays on the page; hits about other rooms fold away so the ones this decision rests on come first.
+        const lines = dedupe(s.memory);
+        const mine = room ? lines.filter((x) => room.test(x.text)) : lines;
+        const rest = room ? lines.filter((x) => !room.test(x.text)) : [];
+        const restCount = rest.reduce((n, x) => n + x.count, 0);
+        return (
+          <div className="jejak-group" key={i}>
+            <div className="jejak-query">
+              “{s.query}”
+              {s.memory.length > 0 && (
+                <span className="jejak-query-meta">
+                  {s.memory.length} {tr(T.hits, lang)} · {lines.length} {tr(T.unique, lang)}
+                </span>
+              )}
             </div>
-          ))}
-        </div>
-      ))}
+            {s.memory.length === 0 && <div className="jejak-line mute">—</div>}
+            {s.memory.length > 0 && room && mine.length === 0 && (
+              <div className="jejak-line mute">
+                {tr(T.noneFor, lang)} {subj}.
+              </div>
+            )}
+            {mine.map((x) => (
+              <MemoryLine key={x.text} {...x} />
+            ))}
+            {rest.length > 0 && (
+              <details className="jejak-more">
+                <summary>
+                  {restCount} {tr(T.others, lang)} {subj}
+                </summary>
+                {rest.map((x) => (
+                  <MemoryLine key={x.text} {...x} />
+                ))}
+              </details>
+            )}
+          </div>
+        );
+      })}
 
       <h2>{tr(T.what, lang)}</h2>
       <div className="jejak-group">
