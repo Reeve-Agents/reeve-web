@@ -65,7 +65,7 @@ const T = {
     anchored: ["Masuk Merkle root yang di-anchor", "Inside an anchored Merkle root"],
   },
   anchoredLocal: ["Masuk Merkle root lokal (belum di-anchor on-chain)", "Inside a local Merkle root (not anchored on-chain yet)"],
-  anchoredChain: ["Di-anchor on-chain (Monad testnet)", "Anchored on-chain (Monad testnet)"],
+  anchoredChain: ["Di-anchor on-chain", "Anchored on-chain"],
   viaLog: ["Tidak terkirim: dicatat di connector Log, belum ada kanal pesan yang tersambung.", "Not sent: recorded on the Log connector, no messaging channel is connected yet."],
   viaStaged: ["Disiapkan, menunggu 10 menit jendela batal sebelum dijalankan.", "Staged: waits out the 10-minute undo window before it runs."],
   viaTelegram: ["Terkirim lewat Telegram.", "Sent on Telegram."],
@@ -183,6 +183,19 @@ function MemoryLine({ text, count }: { text: string; count: number }) {
       {count > 1 && <span className="jejak-count">×{count}</span>}
     </div>
   );
+}
+
+/** The testnet an anchor went to, read from its explorer link (the seed accepts Monad testnet and Base Sepolia). */
+function chainName(explorer: string | undefined): string {
+  let host = "";
+  try {
+    host = explorer ? new URL(explorer).hostname : "";
+  } catch {
+    return "testnet";
+  }
+  if (host.includes("monad")) return "Monad testnet";
+  if (host.includes("basescan") || host.includes("base")) return "Base Sepolia";
+  return host || "testnet";
 }
 
 /** Plain notes on what a decision did NOT do for real: a Log send, a staged action, a demo approval. */
@@ -412,7 +425,7 @@ function One({ receipt, lang }: { receipt: string; lang: Lang }) {
           const val = v.checks[k];
           const pass = k === "anchored" ? !!v.checks.anchored?.proof_ok : !!val;
           // A Merkle root is only "anchored" in the strong sense when a transaction carries it on chain.
-          const text = k !== "anchored" || !pass ? tr(T.checks[k], lang) : v.checks.anchored?.tx || v.checks.anchored?.explorer ? tr(T.anchoredChain, lang) : tr(T.anchoredLocal, lang);
+          const text = k !== "anchored" || !pass ? tr(T.checks[k], lang) : v.checks.anchored?.tx || v.checks.anchored?.explorer ? `${tr(T.anchoredChain, lang)} (${chainName(v.checks.anchored.explorer)})` : tr(T.anchoredLocal, lang);
           return (
             <div className="jejak-line check" key={k}>
               <span className={pass ? "yes" : "no"} aria-hidden="true">{pass ? "✓" : "✕"}</span>
@@ -431,7 +444,7 @@ function One({ receipt, lang }: { receipt: string; lang: Lang }) {
             {v.checks.anchored.explorer && (
               <>
                 {" · "}
-                <a href={v.checks.anchored.explorer}>Monad testnet</a>
+                <a href={v.checks.anchored.explorer}>{chainName(v.checks.anchored.explorer)}</a>
               </>
             )}
           </div>
